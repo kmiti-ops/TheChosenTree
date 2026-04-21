@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<title>Subliminal DJ – Your Relationship's Soundtrack Starts Here</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=DM+Sans:wght@300;400;500;700&family=Bebas+Neue&display=swap" rel="stylesheet" />
+ <link rel="stylesheet" href="style.css" />
+
+</head>
+
+<body>
+
+<!-- =========================================
+     NAVIGATION
+     ========================================= -->
+<nav id="navbar">
+  <div class="nav-logo" onclick="showPage('home')">
+    <span>♪</span> Subliminal <span>DJ</span>
+  </div>
+  <div class="nav-links">
+    <button class="nav-btn active" id="nav-home" onclick="showPage('home')">Home</button>
+    <button class="nav-btn" id="nav-play" onclick="showPage('play')">Play Game</button>
+    <button class="nav-btn" id="nav-shop" onclick="showPage('shop')">Shop</button>
+    <button class="nav-btn" id="nav-app"  onclick="showPage('app')">App</button>
+  </div>
+  <button class="nav-cta" onclick="showPage('play')">▶ Play Free</button>
+  <button class="hamburger" onclick="toggleMobileMenu()">☰</button>
+</nav>
+
+<div id="mobile-menu">
+  <button class="nav-btn" onclick="showPage('home');toggleMobileMenu()">Home</button>
+  <button class="nav-btn" onclick="showPage('play');toggleMobileMenu()">Play Game</button>
+  <button class="nav-btn" onclick="showPage('shop');toggleMobileMenu()">Shop</button>
+  <button class="nav-btn" onclick="showPage('app');toggleMobileMenu()">App</button>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<!-- =========================================
+     PAGE: HOME
+     ========================================= -->
+<div id="page-home" class="page active">
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-ambient"></div>
+    <div class="music-notes" id="music-notes"></div>
+
+    <div class="vinyl-wrap" onclick="toggleVinyl()" title="Click to play/pause">
+      <div class="vinyl-disc" id="vinyl-disc">
+        <div class="vinyl-grooves"></div>
+        <div class="vinyl-label">
+          <div class="vinyl-center-dot"></div>
+          SDJ
+        </div>
+      </div>
+      <div class="vinyl-tip">tap to spin ♪</div>
+    </div>
+
+    <div class="hero-eyebrow"><div class="live-dot"></div> Now Playing: Your Love Story</div>
+
+    <h1>Your Relationship's<br><em>Soundtrack</em><br><span>Starts Here.</span></h1>
+
+    <p class="hero-sub">
+      A music-driven couples' card game that unlocks memories, sparks emotional intimacy, and turns your love story into a playlist you'll never forget. One song at a time.
+    </p>
+
+    <div class="hero-btns">
+      <button class="btn-primary" onclick="showPage('play')">▶ Play Now — It's Free</button>
+      <button class="btn-ghost" onclick="showPage('shop')">Shop Physical Deck →</button>
+    </div>
+
+    <div class="waveform" id="waveform">
+      <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+      <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+      <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+      <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+    </div>
+  </section>
+
+  <!-- Competitive Advantage -->
+  <div class="section">
+    <div class="section-label">Market Intelligence</div>
+    <h2 class="section-title">Why Subliminal DJ<br>Stands Alone</h2>
+    <p class="section-sub">We studied every competitor. Nobody has done this. Here's the gap we're filling.</p>
+
+    <div class="compare-grid">
+      <!-- Competitors -->
+      <div class="compare-card">
+        <span class="compare-tag them">The Competition</span>
+        <h3>WNRS, BestSelf, Joyful Couple…</h3>
+        <ul class="compare-items">
+          <li><span class="icon-x">✗</span> Text-only prompts — no sensory dimension</li>
+          <li><span class="icon-x">✗</span> Static question decks, same every time</li>
+          <li><span class="icon-x">✗</span> No music integration — big missed opportunity</li>
+          <li><span class="icon-x">✗</span> No session memory or playlist archive</li>
+          <li><span class="icon-x">✗</span> No competitive "battle" mechanic — just one mode</li>
+          <li><span class="icon-x">✗</span> WNRS has 5.3M Instagram followers but zero audio layer</li>
+          <li><span class="icon-x">✗</span> Hitster uses music but is trivia — NOT emotional intimacy</li>
+        </ul>
+      </div>
+
+      <!-- Subliminal DJ -->
+      <div class="compare-card sdj">
+        <span class="compare-tag us">Subliminal DJ</span>
+        <h3>The Music-Intimacy Bridge</h3>
+        <ul class="compare-items">
+          <li><span class="icon-star">★</span> Music is the core mechanic, not an afterthought</li>
+          <li><span class="icon-star">★</span> 5 emotionally distinct deck types for any mood</li>
+          <li><span class="icon-star">★</span> Deep Spotify + Apple Music integration built-in</li>
+          <li><span class="icon-star">★</span> Session log + playlist archive = couples keep the memory</li>
+          <li><span class="icon-star">★</span> DJ Battle mode — competitive fun in same product</li>
+          <li><span class="icon-star">★</span> Companion app saves your love's "greatest hits"</li>
+          <li><span class="icon-star">★</span> Songs as emotional anchors — proven psychology</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Five Decks -->
+  <div class="section" style="padding-top:0">
+    <div class="section-label">Game Mechanics</div>
+    <h2 class="section-title">Five Decks.<br>One Love Story.</h2>
+    <div class="decks-grid">
+      <div class="deck-card" style="border-color:rgba(156,39,176,0.4); box-shadow: 0 0 25px rgba(156,39,176,0.12);" onmouseenter="this.style.boxShadow='0 20px 50px rgba(156,39,176,0.25)'" onmouseleave="this.style.boxShadow='0 0 25px rgba(156,39,176,0.12)'">
+        <div class="deck-icon">⏳</div>
+        <div class="deck-label" style="color:#ce93d8">Memory Lane</div>
+        <div class="deck-desc">Songs tied to shared memories. Nostalgia as a love language.</div>
+      </div>
+      <div class="deck-card" style="border-color:rgba(255,64,129,0.4); box-shadow: 0 0 25px rgba(255,64,129,0.12);" onmouseenter="this.style.boxShadow='0 20px 50px rgba(255,64,129,0.25)'" onmouseleave="this.style.boxShadow='0 0 25px rgba(255,64,129,0.12)'">
+        <div class="deck-icon">✨</div>
+        <div class="deck-label" style="color:#f48fb1">Fantasy Frequencies</div>
+        <div class="deck-desc">Flirty, playful and romantic. The soundtrack of "what if."</div>
+      </div>
+      <div class="deck-card" style="border-color:rgba(0,188,212,0.4); box-shadow: 0 0 25px rgba(0,188,212,0.12);" onmouseenter="this.style.boxShadow='0 20px 50px rgba(0,188,212,0.25)'" onmouseleave="this.style.boxShadow='0 0 25px rgba(0,188,212,0.12)'">
+        <div class="deck-icon">🎯</div>
+        <div class="deck-label" style="color:#80deea">Vibe Check</div>
+        <div class="deck-desc">In-the-moment feelings. A song can say what words can't.</div>
+      </div>
+      <div class="deck-card" style="border-color:rgba(255,213,79,0.4); box-shadow: 0 0 25px rgba(255,213,79,0.12);" onmouseenter="this.style.boxShadow='0 20px 50px rgba(255,213,79,0.25)'" onmouseleave="this.style.boxShadow='0 0 25px rgba(255,213,79,0.12)'">
+        <div class="deck-icon">🖤</div>
+        <div class="deck-label" style="color:#fff176">Deep Cuts</div>
+        <div class="deck-desc">Vulnerability and growth. The songs you've never shared.</div>
+      </div>
+      <div class="deck-card" style="border-color:rgba(255,152,0,0.4); box-shadow: 0 0 25px rgba(255,152,0,0.12);" onmouseenter="this.style.boxShadow='0 20px 50px rgba(255,152,0,0.25)'" onmouseleave="this.style.boxShadow='0 0 25px rgba(255,152,0,0.12)'">
+        <div class="deck-icon">⚡</div>
+        <div class="deck-label" style="color:#ffcc80">DJ Battles</div>
+        <div class="deck-desc">Head-to-head music battles. Competitive, ridiculous, unforgettable.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-bar">
+    <div class="stats-inner">
+      <div><div class="stat-val">100+</div><div class="stat-label">Prompt Cards</div></div>
+      <div><div class="stat-val">5</div><div class="stat-label">Deck Types</div></div>
+      <div><div class="stat-val">∞</div><div class="stat-label">Replay Value</div></div>
+      <div><div class="stat-val">18+</div><div class="stat-label">Any Couple</div></div>
+    </div>
+  </div>
+
+  <!-- Final CTA -->
+  <div class="section" style="text-align:center">
+    <h2 class="section-title">Ready to Press <em style="color:var(--accent)">Play?</em></h2>
+    <p class="section-sub" style="margin: 0 auto 36px">
+      Try the game free online, or get the physical deck delivered. Either way, your love story gets a soundtrack.
+    </p>
+    <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap">
+      <button class="btn-primary" onclick="showPage('play')">Play Free Online</button>
+      <button class="btn-gold" onclick="showPage('shop')">View Expansion Packs</button>
+    </div>
+  </div>
+</div>
+
+<!-- =========================================
+     PAGE: PLAY
+     ========================================= -->
+<div id="page-play" class="page">
+<div class="play-wrap">
+
+  <div class="play-header">
+    <div class="section-label" style="justify-content:center;display:flex;align-items:center;gap:6px;margin-bottom:10px">
+      <div class="live-dot"></div> Live Game Session
+    </div>
+    <h2>Your Game Night</h2>
+    <p>Pick a deck, draw a card, find the song. Connect.</p>
+  </div>
+
+  <!-- Category tabs -->
+  <div class="cat-tabs" id="cat-tabs">
+    <button class="cat-tab active" data-cat="memory" onclick="selectCat('memory',this)">⏳ Memory Lane</button>
+    <button class="cat-tab" data-cat="fantasy" onclick="selectCat('fantasy',this)">✨ Fantasy Freq</button>
+    <button class="cat-tab" data-cat="vibe" onclick="selectCat('vibe',this)">🎯 Vibe Check</button>
+    <button class="cat-tab" data-cat="deep" onclick="selectCat('deep',this)">🖤 Deep Cuts</button>
+    <button class="cat-tab" data-cat="battle" onclick="selectCat('battle',this)">⚡ DJ Battle</button>
+  </div>
+
+  <!-- Card display -->
+  <div class="game-card-display" id="game-card-display">
+    <div class="card-category-tag" id="card-cat-tag" style="color:var(--accent)">⏳ Memory Lane — Card 1 of 4</div>
+    <p class="card-prompt" id="card-prompt">"Play a song that reminds you of when we first met. What memory comes to mind?"</p>
+    <div class="streaming-btns">
+      <a href="https://open.spotify.com" target="_blank" class="btn-spotify">🎵 Open Spotify</a>
+      <a href="https://music.apple.com" target="_blank" class="btn-apple">🎵 Apple Music</a>
+    </div>
+  </div>
+
+  <div class="play-controls">
+    <button class="btn-next-card" onclick="nextCard()">Next Card →</button>
+    <button class="btn-reset-game" onclick="resetGame()">↺ Reset</button>
+  </div>
+
+  <!-- Session Log -->
+  <div class="session-log" id="session-log" style="display:none">
+    <div class="session-log-title">🎵 Tonight's Session — <span id="log-count">0</span> cards played</div>
+    <div id="log-items"></div>
+  </div>
+
+</div>
+</div>
+
+<!-- =========================================
+     PAGE: SHOP
+     ========================================= -->
+<div id="page-shop" class="page">
+<div class="shop-wrap">
+
+  <div class="shop-header">
+    <div class="section-label">The Collection</div>
+    <h2>Shop Subliminal DJ</h2>
+    <p>Every deck tells a different story. Which one is yours?</p>
+  </div>
+
+  <div class="cart-bar" id="cart-bar">
+    <span class="cart-text" id="cart-text">🛒 0 items in cart</span>
+    <button class="btn-checkout">Checkout →</button>
+  </div>
+
+  <!-- Starter Deck Hero -->
+  <div class="product-hero">
+    <div class="product-vinyl">
+      <!-- SVG Vinyl -->
+      <svg width="140" height="140" viewBox="0 0 140 140" style="filter:drop-shadow(0 0 25px rgba(255,87,34,0.5))">
+        <circle cx="70" cy="70" r="68" fill="#1a0800" stroke="#3a1a08" stroke-width="2"/>
+        <circle cx="70" cy="70" r="62" fill="none" stroke="#2a1205" stroke-width="1"/>
+        <circle cx="70" cy="70" r="52" fill="none" stroke="#2a1205" stroke-width="1"/>
+        <circle cx="70" cy="70" r="42" fill="none" stroke="#2a1205" stroke-width="1"/>
+        <circle cx="70" cy="70" r="32" fill="none" stroke="#2a1205" stroke-width="1"/>
+        <circle cx="70" cy="70" r="22" fill="#ff5722"/>
+        <circle cx="70" cy="70" r="14" fill="#e64a19"/>
+        <circle cx="70" cy="70" r="6" fill="#1a0800"/>
+        <text x="70" y="67" text-anchor="middle" fill="white" font-size="6" font-family="sans-serif" font-weight="bold">SDJ</text>
+        <text x="70" y="76" text-anchor="middle" fill="rgba(255,255,255,0.6)" font-size="4">●●●</text>
+      </svg>
+    </div>
+    <div class="product-info">
+      <span class="product-badge">★ Bestseller — Starter Deck</span>
+      <h3>The Soundtrack of Us</h3>
+      <p>100+ music-based prompt cards across 5 emotional categories. For couples at any stage — 6 months or 16 years in. Works with any streaming service.</p>
+      <ul class="features-list">
+        <li><span class="check-icon">✓</span> 100 curated prompt cards</li>
+        <li><span class="check-icon">✓</span> 5 emotional deck types</li>
+        <li><span class="check-icon">✓</span> Works with Spotify & Apple Music</li>
+        <li><span class="check-icon">✓</span> 30–90 min gameplay</li>
+        <li><span class="check-icon">✓</span> Ages 18+ — any couple, any stage</li>
+      </ul>
+      <div class="price-row">
+        <span class="price-tag">$34</span>
+        <button class="btn-add-cart" onclick="addToCart('The Soundtrack of Us', 34)">Add to Cart</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Expansion Packs -->
+  <div class="packs-label">Expansion Packs</div>
+  <div class="packs-grid">
+    <div class="pack-card" style="border-color:rgba(156,39,176,0.3)" onmouseenter="this.style.boxShadow='0 16px 40px rgba(156,39,176,0.2)'" onmouseleave="this.style.boxShadow=''">
+      <div class="pack-icon">🌙</div>
+      <div class="pack-name" style="color:#ce93d8">Date Night Edition</div>
+      <div class="pack-desc">Intimate prompts for an unforgettable evening. Turn date night into a musical memory.</div>
+      <div class="pack-footer">
+        <span class="pack-price">$12</span>
+        <button class="btn-pack-add" style="color:#ce93d8;border-color:rgba(156,39,176,0.4)" onclick="addToCart('Date Night Edition',12)">Add +</button>
+      </div>
+    </div>
+    <div class="pack-card" style="border-color:rgba(0,188,212,0.3)" onmouseenter="this.style.boxShadow='0 16px 40px rgba(0,188,212,0.2)'" onmouseleave="this.style.boxShadow=''">
+      <div class="pack-icon">✈️</div>
+      <div class="pack-name" style="color:#80deea">LDR Edition</div>
+      <div class="pack-desc">For couples loving across the distance. Bridge the gap, one song at a time.</div>
+      <div class="pack-footer">
+        <span class="pack-price">$12</span>
+        <button class="btn-pack-add" style="color:#80deea;border-color:rgba(0,188,212,0.4)" onclick="addToCart('LDR Edition',12)">Add +</button>
+      </div>
+    </div>
+    <div class="pack-card" style="border-color:rgba(76,175,80,0.3)" onmouseenter="this.style.boxShadow='0 16px 40px rgba(76,175,80,0.2)'" onmouseleave="this.style.boxShadow=''">
+      <div class="pack-icon">🌱</div>
+      <div class="pack-name" style="color:#a5d6a7">Healing & Rebuilding</div>
+      <div class="pack-desc">Therapy-inspired deck for growth together. Music to heal what words alone can't reach.</div>
+      <div class="pack-footer">
+        <span class="pack-price">$14</span>
+        <button class="btn-pack-add" style="color:#a5d6a7;border-color:rgba(76,175,80,0.4)" onclick="addToCart('Healing & Rebuilding',14)">Add +</button>
+      </div>
+    </div>
+    <div class="pack-card" style="border-color:rgba(255,213,79,0.3)" onmouseenter="this.style.boxShadow='0 16px 40px rgba(255,213,79,0.2)'" onmouseleave="this.style.boxShadow=''">
+      <div class="pack-icon">💍</div>
+      <div class="pack-name" style="color:#fff176">Wedding Vibes</div>
+      <div class="pack-desc">For the engaged & newly married. Celebrate your story, score and all.</div>
+      <div class="pack-footer">
+        <span class="pack-price">$12</span>
+        <button class="btn-pack-add" style="color:#fff176;border-color:rgba(255,213,79,0.4)" onclick="addToCart('Wedding Vibes',12)">Add +</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Premium Bundles -->
+  <div class="bundles-section">
+    <div class="bundles-label">★ Premium Bundles</div>
+    <div class="bundles-grid">
+      <div class="bundle-row">
+        <div>
+          <div class="bundle-name">Complete Collection</div>
+          <div class="bundle-desc">Starter deck + all 4 expansion packs</div>
+          <div class="bundle-save">Save $14</div>
+        </div>
+        <div class="bundle-right">
+          <div class="bundle-price">$58</div>
+          <button class="btn-bundle-add" onclick="addToCart('Complete Collection',58)">Add</button>
+        </div>
+      </div>
+      <div class="bundle-row">
+        <div>
+          <div class="bundle-name">Date Night Bundle</div>
+          <div class="bundle-desc">Starter + Playlist Journal + Candle Set</div>
+          <div class="bundle-save">Save $18</div>
+        </div>
+        <div class="bundle-right">
+          <div class="bundle-price">$72</div>
+          <button class="btn-bundle-add" onclick="addToCart('Date Night Bundle',72)">Add</button>
+        </div>
+      </div>
+      <div class="bundle-row">
+        <div>
+          <div class="bundle-name">Luxury Bundle</div>
+          <div class="bundle-desc">Full collection + His & Hers headphones</div>
+          <div class="bundle-save">Save $30</div>
+        </div>
+        <div class="bundle-right">
+          <div class="bundle-price">$149</div>
+          <button class="btn-bundle-add" onclick="addToCart('Luxury Bundle',149)">Add</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- =========================================
+     PAGE: APP
+     ========================================= -->
+<div id="page-app" class="page">
+<div class="app-wrap">
+
+  <div class="app-header">
+    <div class="section-label">Companion App</div>
+    <h2>Your Playlist Hub</h2>
+    <p>Save sessions. Build playlists. Revisit your love story anytime.</p>
+  </div>
+
+  <div class="app-grid">
+
+    <!-- Mood Picker -->
+    <div class="app-panel">
+      <h3>Tonight's Vibe</h3>
+      <div class="sub">Pick a mood to get song suggestions</div>
+      <button class="mood-btn" data-mood="romantic" onclick="selectMood('romantic',this)">❤️ Romantic</button>
+      <button class="mood-btn" data-mood="nostalgic" onclick="selectMood('nostalgic',this)">⏳ Nostalgic</button>
+      <button class="mood-btn" data-mood="playful"  onclick="selectMood('playful',this)">😄 Playful</button>
+      <button class="mood-btn" data-mood="vulnerable" onclick="selectMood('vulnerable',this)">🌙 Vulnerable</button>
+
+      <div class="mood-suggestions" id="mood-sugg" style="display:none">
+        <div class="mood-sugg-label" id="sugg-label">SUGGESTED TRACKS</div>
+        <div id="sugg-songs"></div>
+      </div>
+    </div>
+
+    <!-- Playlist Builder -->
+    <div class="app-panel">
+      <h3>Build Tonight's Playlist</h3>
+      <div class="sub">Add songs as you play — save your love's greatest hits</div>
+      <div class="playlist-input-row">
+        <input type="text" class="playlist-input" id="song-input" placeholder="Song name + artist…" onkeydown="if(event.key==='Enter')addSong()" />
+        <button class="btn-add-song" onclick="addSong()">+</button>
+      </div>
+      <div class="playlist-songs" id="playlist-songs">
+        <div class="playlist-empty" id="playlist-empty">No songs yet — start adding! ♪</div>
+      </div>
+      <button class="btn-export-spotify" id="export-btn" style="display:none" onclick="showToast('Playlist exported to Spotify! 🎵')">Export to Spotify →</button>
+    </div>
+
+  </div>
+
+  <!-- Session History -->
+  <div class="sessions-panel">
+    <div class="sessions-header">
+      <div>
+        <h3>Past Sessions</h3>
+        <p>Your love story, saved</p>
+      </div>
+      <button class="btn-new-session" onclick="showToast('New session started! 🎵')">+ New Session</button>
+    </div>
+    <div class="session-cards" id="session-cards">
+      <div class="session-item">
+        <div class="session-meta">
+          <div><div class="session-date">Apr 18</div><div class="session-name">Fantasy Frequencies Night</div></div>
+          <span class="session-count">8 cards</span>
+        </div>
+        <div class="session-tags">
+          <span class="session-tag">♪ Golden Hour</span>
+          <span class="session-tag">♪ Lover</span>
+          <span class="session-tag">♪ Perfect</span>
+        </div>
+      </div>
+      <div class="session-item">
+        <div class="session-meta">
+          <div><div class="session-date">Apr 12</div><div class="session-name">Deep Cuts Night</div></div>
+          <span class="session-count">12 cards</span>
+        </div>
+        <div class="session-tags">
+          <span class="session-tag">♪ The Night We Met</span>
+          <span class="session-tag">♪ Skinny Love</span>
+          <span class="session-tag">♪ Holocene</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- App Download CTA -->
+  <div class="app-cta">
+    <div class="app-cta-icon">📱</div>
+    <h3>Mobile App — Coming Soon</h3>
+    <p>Native iOS & Android apps with Spotify deep integration, partner sync, and session saving. Be the first to know.</p>
+    <div class="app-store-btns">
+      <button class="btn-store" onclick="showToast('You\'ll be notified when iOS drops! 🍎')">🍎 Notify Me — iOS</button>
+      <button class="btn-store" onclick="showToast('You\'ll be notified when Android drops! 🤖')">🤖 Notify Me — Android</button>
+    </div>
+  </div>
+
+</div>
+</div>
+
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <h4>Subliminal <span>DJ</span></h4>
+        <p>The couples' card game that turns music into emotional connection. One song at a time.</p>
+      </div>
+      <div class="footer-col">
+        <h5>Play</h5>
+        <span class="footer-link" onclick="showPage('play')">Play Free Online</span>
+        <span class="footer-link" onclick="showPage('play')">Browse Cards</span>
+        <span class="footer-link" onclick="showPage('play')">DJ Battle Mode</span>
+      </div>
+      <div class="footer-col">
+        <h5>Shop</h5>
+        <span class="footer-link" onclick="showPage('shop')">Starter Deck</span>
+        <span class="footer-link" onclick="showPage('shop')">Expansion Packs</span>
+        <span class="footer-link" onclick="showPage('shop')">Bundles</span>
+      </div>
+      <div class="footer-col">
+        <h5>App</h5>
+        <span class="footer-link" onclick="showPage('app')">Playlist Hub</span>
+        <span class="footer-link" onclick="showPage('app')">Session History</span>
+        <span class="footer-link" onclick="showPage('app')">Notify Me</span>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span class="footer-copy">© 2025 Subliminal DJ. All rights reserved.</span>
+      <div class="social-icons">
+        <div class="social-icon" title="TikTok">♪</div>
+        <div class="social-icon" title="Instagram">◎</div>
+        <div class="social-icon" title="Spotify">♫</div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="script.js" defer></script>
+
+</body>
+</html>
