@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>Subliminal DJ App</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=DM+Sans:wght@300;400;500;600;700&family=Bebas+Neue&display=swap" rel="stylesheet"/>
+
+<!--
+=================================================================
+  EASY CUSTOMIZATION GUIDE — Edit these sections:
+  1. COLORS      → :root variables (~line 60)
+  2. CARD PROMPTS → CARDS_DATA object in <script>
+  3. MOOD SONGS  → MOODS object in <script>
+  4. BATTLE THEMES → BATTLE_THEMES array in <script>
+  5. PRICES/PACKS  → Edit PACKS array in <script>
+  6. BRAND NAME    → Search "Subliminal DJ" to rename
+=================================================================
+-->
+
+<style>
+/* =================================================================
+   1. BRAND COLORS — Change these to restyle the entire app
+================================================================= */
+:root {
+  --bg:        #150800;    /* App background                  */
+  --surface:   #1f0e04;    /* Panel/card backgrounds          */
+  --card:      #2a1508;    /* Elevated card                   */
+  --border:    #3d1f0d;    /* Borders                         */
+  --fire:      #ff5722;    /* Primary CTA color               */
+  --amber:     #ff9800;    /* Secondary accent                */
+  --gold:      #ffd54f;    /* Gold highlights                 */
+  --rose:      #ff4081;    /* Pink/rose accent                */
+  --teal:      #00bcd4;    /* Cool contrast                   */
+  --green:     #69f0ae;    /* Success states                  */
+  --text:      #fff8f0;    /* Primary text                    */
+  --muted:     #9a7060;    /* Secondary text                  */
+  --dim:       #4a2515;    /* Very muted / disabled           */
+  --glow-fire: rgba(255,87,34,.35);
+  --glow-gold: rgba(255,213,79,.25);
+  --glow-rose: rgba(255,64,129,.3);
+  --nav-h:     72px;
+  --r:         16px;
+  --r-lg:      24px;
+  --r-xl:      32px;
+}
+
+/* =================================================================
+   BASE
+================================================================= */
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+html,body { height:100%; overflow:hidden; background:#000; }
+body { font-family:'DM Sans',sans-serif; color:var(--text); display:flex; align-items:center; justify-content:center; }
+button,input { font-family:inherit; outline:none; }
+button { cursor:pointer; }
+a { color:inherit; text-decoration:none; }
+::-webkit-scrollbar { width:3px; }
+::-webkit-scrollbar-thumb { background:var(--fire); border-radius:2px; }
+
+/* =================================================================
+   PHONE SHELL
+================================================================= */
+#app {
+  width:100%; max-width:420px;
+  height:100vh; max-height:900px;
+  background:var(--bg);
+  display:flex; flex-direction:column;
+  position:relative; overflow:hidden;
+  box-shadow:0 0 0 1px #2a1205, 0 40px 100px rgba(0,0,0,.9);
+}
+
+/* =================================================================
+   ANIMATIONS
+================================================================= */
+@keyframes spin      { to{transform:rotate(360deg);} }
+@keyframes pulse     { 0%,100%{opacity:.5;} 50%{opacity:1;} }
+@keyframes float     { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-8px);} }
+@keyframes wave-bar  { 0%,100%{transform:scaleY(.25);} 50%{transform:scaleY(1);} }
+@keyframes slide-up  { from{opacity:0;transform:translateY(18px);} to{opacity:1;transform:translateY(0);} }
+@keyframes fade-in   { from{opacity:0;} to{opacity:1;} }
+@keyframes card-flip { 0%{transform:rotateY(-10deg) scale(.96);opacity:.5;} 100%{transform:rotateY(0) scale(1);opacity:1;} }
+@keyframes note-rise { 0%{opacity:.9;transform:translateY(0) scale(1);} 100%{opacity:0;transform:translateY(-60px) scale(.7) rotate(15deg);} }
+@keyframes rec-spin  { to{transform:rotate(360deg);} }
+@keyframes pop       { 0%{transform:scale(.8);opacity:0;} 60%{transform:scale(1.1);} 100%{transform:scale(1);opacity:1;} }
+
+/* =================================================================
+   STATUS BAR
+================================================================= */
+#status-bar {
+  height:44px; background:var(--bg);
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 20px; flex-shrink:0; z-index:100;
+}
+.sb-time  { font-size:15px; font-weight:700; letter-spacing:.5px; }
+.sb-icons { font-size:12px; display:flex; gap:5px; }
+
+/* =================================================================
+   SCREEN SYSTEM
+================================================================= */
+#screens { flex:1; overflow:hidden; position:relative; }
+.screen  {
+  position:absolute; inset:0; overflow-y:auto; overflow-x:hidden;
+  padding-bottom:calc(var(--nav-h) + 12px); display:none; animation:fade-in .22s ease;
+}
+.screen.active { display:block; }
+
+/* =================================================================
+   BOTTOM NAV
+================================================================= */
+#bottom-nav {
+  height:var(--nav-h);
+  background:rgba(21,8,0,.97); backdrop-filter:blur(20px);
+  border-top:1px solid var(--border);
+  display:flex; flex-shrink:0; z-index:200;
+}
+.nav-btn {
+  flex:1; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:3px;
+  background:none; border:none; color:var(--muted);
+  cursor:pointer; transition:color .2s; -webkit-tap-highlight-color:transparent;
+}
+.nav-btn.active { color:var(--fire); }
+.nav-btn:active { opacity:.7; }
+.nav-icon  { font-size:21px; }
+.nav-label { font-size:9px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; }
+.nav-dot   { width:4px; height:4px; border-radius:50%; background:var(--fire); display:none; animation:pulse .9s ease infinite; }
+.nav-btn.active .nav-dot { display:block; }
+
+/* =================================================================
+   COMMON COMPONENTS
+================================================================= */
+.sec-eyebrow { font-size:10px; letter-spacing:4px; text-transform:uppercase; font-weight:700; color:var(--amber); margin-bottom:5px; }
+.sec-title   { font-family:'Abril Fatface',serif; font-size:clamp(24px,7vw,34px); line-height:1.05; }
+.sec-title em { color:var(--fire); font-style:normal; }
+
+/* Buttons */
+.btn { display:inline-flex; align-items:center; justify-content:center; gap:7px; border:none; border-radius:50px; font-weight:700; cursor:pointer; transition:transform .15s,box-shadow .15s; white-space:nowrap; }
+.btn:active { transform:scale(.94) !important; }
+.btn-fire   { background:linear-gradient(135deg,var(--fire),var(--rose)); color:white; padding:14px 28px; font-size:15px; box-shadow:0 0 28px var(--glow-fire); }
+.btn-fire:hover { box-shadow:0 0 48px var(--glow-fire); transform:translateY(-1px); }
+.btn-outline{ background:transparent; color:var(--text); border:1.5px solid var(--border); padding:12px 22px; font-size:14px; }
+.btn-outline:hover { border-color:var(--amber); color:var(--amber); }
+.btn-ghost  { background:rgba(255,87,34,.1); color:var(--fire); border:1px solid rgba(255,87,34,.3); padding:9px 18px; font-size:13px; }
+.btn-teal   { background:var(--teal); color:#003040; padding:12px 22px; font-size:14px; font-weight:800; }
+.btn-gold   { background:var(--gold); color:#1a0800; padding:12px 22px; font-size:14px; font-weight:800; }
+.btn-sm     { padding:8px 16px !important; font-size:12px !important; }
+.btn-full   { width:100%; }
+
+/* Panel */
+.panel      { background:var(--surface); border:1px solid var(--border); border-radius:var(--r-lg); padding:18px; }
+.panel-fire { background:linear-gradient(135deg,rgba(255,87,34,.1),var(--surface)); border-color:rgba(255,87,34,.4); box-shadow:0 0 40px rgba(255,87,34,.1); }
+
+/* Waveform */
+.waveform   { display:flex; align-items:center; gap:3px; height:26px; }
+.wb { width:3px; background:var(--fire); border-radius:2px; transform-origin:center; }
+.wb:nth-child(1){height:35%;animation:wave-bar .55s ease-in-out infinite alternate;}
+.wb:nth-child(2){height:75%;animation:wave-bar .6s .05s ease-in-out infinite alternate;}
+.wb:nth-child(3){height:100%;animation:wave-bar .5s .1s ease-in-out infinite alternate;}
+.wb:nth-child(4){height:50%;animation:wave-bar .65s .15s ease-in-out infinite alternate;}
+.wb:nth-child(5){height:85%;animation:wave-bar .55s .2s ease-in-out infinite alternate;}
+.wb:nth-child(6){height:40%;animation:wave-bar .6s .25s ease-in-out infinite alternate;}
+.wb:nth-child(7){height:70%;animation:wave-bar .5s .3s ease-in-out infinite alternate;}
+.wb:nth-child(8){height:90%;animation:wave-bar .65s .35s ease-in-out infinite alternate;}
+
+/* Live dot */
+.ld { width:7px; height:7px; border-radius:50%; background:var(--fire); display:inline-block; animation:pulse 1s ease infinite; flex-shrink:0; }
+
+/* Input base */
+.inp {
+  width:100%; background:var(--surface); border:1.5px solid var(--border);
+  border-radius:var(--r); padding:13px 16px; color:var(--text); font-size:14px;
+  transition:border-color .2s;
+}
+.inp:focus { border-color:var(--amber); }
+.inp::placeholder { color:var(--dim); }
+
+/* Vinyl SVG helper */
+.vinyl-glow { filter:drop-shadow(0 0 20px rgba(255,87,34,.55)); }
+
+/* Toast */
+#toast {
+  position:fixed; bottom:calc(var(--nav-h) + 14px); left:50%; transform:translateX(-50%);
+  background:var(--card); border:1px solid var(--fire); color:var(--fire);
+  padding:11px 22px; border-radius:50px; font-size:13px; font-weight:700;
+  z-index:9999; box-shadow:0 0 30px var(--glow-fire);
+  display:none; white-space:nowrap; animation:slide-up .3s ease;
+}
+
+/* Floating note */
+.fnote { position:fixed; pointer-events:none; z-index:9000; font-size:20px; animation:note-rise 1.2s ease-out forwards; }
+
+/* =================================================================
+   ONBOARDING
+================================================================= */
+#onboarding {
+  position:absolute; inset:0; z-index:500; background:var(--bg);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  padding:32px 28px; text-align:center; animation:fade-in .4s ease;
+}
+.ob-logo { font-family:'Bebas Neue',sans-serif; font-size:34px; letter-spacing:4px; }
+.ob-logo span { color:var(--fire); }
+.ob-sub  { color:var(--muted); font-size:13px; margin-bottom:28px; }
+.ob-vinyl { margin-bottom:24px; animation:float 3s ease-in-out infinite; }
+.ob-title { font-family:'Abril Fatface',serif; font-size:26px; line-height:1.2; margin-bottom:10px; }
+.ob-title em { color:var(--fire); font-style:normal; }
+.ob-desc  { color:var(--muted); font-size:13px; line-height:1.6; margin-bottom:28px; }
+.ob-fields { width:100%; display:flex; flex-direction:column; gap:10px; margin-bottom:20px; }
+.ob-inp   { text-align:center; background:var(--surface); border:1.5px solid var(--border); border-radius:var(--r); padding:13px; color:var(--text); font-size:15px; transition:border-color .2s; }
+.ob-inp:focus { border-color:var(--amber); }
+.ob-inp::placeholder { color:var(--dim); }
+.ob-skip  { color:var(--muted); font-size:12px; cursor:pointer; margin-top:12px; display:block; }
+
+/* =================================================================
+   HOME SCREEN
+================================================================= */
+.home-hero {
+  padding:20px 20px 18px;
+  background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(255,87,34,.16) 0%,transparent 70%);
+  text-align:center; position:relative; overflow:hidden;
+}
+.home-greet { font-size:12px; color:var(--muted); margin-bottom:3px; letter-spacing:.5px; }
+.home-logo  { font-family:'Bebas Neue',sans-serif; font-size:30px; letter-spacing:3px; margin-bottom:12px; }
+.home-logo span { color:var(--fire); }
+.vinyl-wrap { position:relative; display:inline-block; cursor:pointer; animation:float 4s ease-in-out infinite; }
+.vinyl-ring {
+  width:130px; height:130px; border-radius:50%; border:1px solid rgba(255,87,34,.2);
+  position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+  animation:pulse 2s ease infinite;
+}
+.vinyl-ring-2 { width:155px; height:155px; animation-delay:.6s; }
+.home-tagline { color:var(--muted); font-size:12px; margin-top:12px; line-height:1.5; }
+.home-tagline b { color:var(--amber); font-weight:700; }
+
+/* Quick pills */
+.qa-row { display:flex; gap:8px; padding:0 20px; margin:14px 0; overflow-x:auto; scrollbar-width:none; }
+.qa-row::-webkit-scrollbar { display:none; }
+.qa-pill {
+  flex-shrink:0; background:var(--surface); border:1px solid var(--border);
+  border-radius:50px; padding:9px 16px; font-size:12px; font-weight:600;
+  cursor:pointer; transition:all .2s; white-space:nowrap; display:flex; align-items:center; gap:6px;
+}
+.qa-pill:active { transform:scale(.93); }
+.qa-pill.hot { border-color:rgba(255,87,34,.4); color:var(--fire); background:rgba(255,87,34,.08); }
+
+/* Daily pick */
+.daily-pick {
+  margin:0 20px 14px;
+  background:linear-gradient(135deg,rgba(255,87,34,.15),rgba(255,64,129,.08));
+  border:1px solid rgba(255,87,34,.4); border-radius:var(--r-lg);
+  padding:16px; cursor:pointer; transition:transform .2s;
+}
+.daily-pick:active { transform:scale(.98); }
+.dp-label { font-size:10px; letter-spacing:3px; text-transform:uppercase; color:var(--fire); font-weight:700; margin-bottom:7px; display:flex; align-items:center; gap:6px; }
+.dp-title { font-family:'Abril Fatface',serif; font-size:18px; margin-bottom:5px; }
+.dp-desc  { color:var(--muted); font-size:12px; line-height:1.5; }
+.dp-foot  { display:flex; justify-content:space-between; align-items:center; margin-top:12px; }
+
+/* Deck scroll */
+.deck-row-label { padding:0 20px; font-size:10px; letter-spacing:3px; text-transform:uppercase; font-weight:700; color:var(--muted); margin-bottom:8px; }
+.deck-scroll    { display:flex; gap:10px; padding:0 20px; overflow-x:auto; scrollbar-width:none; padding-bottom:4px; }
+.deck-scroll::-webkit-scrollbar { display:none; }
+.deck-thumb {
+  flex-shrink:0; width:112px; background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--r); padding:14px 12px; cursor:pointer; transition:transform .2s;
+}
+.deck-thumb:active { transform:scale(.94); }
+.dt-icon  { font-size:24px; margin-bottom:7px; }
+.dt-name  { font-size:11px; font-weight:700; letter-spacing:.5px; line-height:1.3; }
+.dt-count { font-size:10px; color:var(--muted); margin-top:3px; }
+
+/* Home stats */
+.home-stats { display:flex; gap:8px; padding:0 20px; margin:14px 0; }
+.hs-box { flex:1; background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:12px 8px; text-align:center; }
+.hs-val { font-family:'Bebas Neue',sans-serif; font-size:26px; color:var(--fire); }
+.hs-lbl { font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-top:2px; }
+
+/* =================================================================
+   PLAY SCREEN
+================================================================= */
+#screen-play { padding:14px 14px 0; }
+
+.play-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+.play-top h2 { font-family:'Abril Fatface',serif; font-size:24px; }
+.session-badge { background:rgba(255,87,34,.12); border:1px solid rgba(255,87,34,.3); color:var(--fire); padding:5px 12px; border-radius:50px; font-size:11px; font-weight:700; display:flex; align-items:center; gap:5px; }
+
+.cat-scroll { display:flex; gap:7px; overflow-x:auto; scrollbar-width:none; margin-bottom:14px; }
+.cat-scroll::-webkit-scrollbar { display:none; }
+.cat-chip {
+  flex-shrink:0; background:var(--surface); border:1px solid var(--border);
+  color:var(--muted); padding:8px 15px; border-radius:50px;
+  font-size:12px; font-weight:600; cursor:pointer; transition:all .2s; white-space:nowrap;
+}
+.cat-chip.active { background:rgba(255,87,34,.13); border-color:rgba(255,87,34,.5); color:var(--fire); }
+.cat-chip:active { transform:scale(.93); }
+
+/* Main card */
+.game-card {
+  border-radius:var(--r-xl); padding:26px 20px; text-align:center;
+  border:1px solid rgba(255,87,34,.4);
+  background:linear-gradient(135deg,rgba(255,87,34,.1),var(--surface));
+  box-shadow:0 0 50px rgba(255,87,34,.1);
+  min-height:196px; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  position:relative; overflow:hidden; cursor:pointer; transition:transform .15s;
+}
+.game-card:active { transform:scale(.98); }
+.game-card.anim { animation:card-flip .35s cubic-bezier(.4,0,.2,1); }
+.gc-bgnote { position:absolute; top:-15px; right:-8px; font-size:72px; opacity:.04; pointer-events:none; transform:rotate(15deg); }
+.gc-cat    { font-size:10px; letter-spacing:3px; text-transform:uppercase; font-weight:700; margin-bottom:14px; display:flex; align-items:center; gap:6px; }
+.gc-counter{ font-size:10px; color:var(--muted); margin-bottom:6px; }
+.gc-prompt { font-family:'Abril Fatface',serif; font-size:clamp(16px,5vw,21px); line-height:1.45; font-style:italic; color:var(--text); margin-bottom:18px; }
+.gc-hint   { color:var(--dim); font-size:11px; }
+
+/* Streaming */
+.stream-row { display:flex; gap:9px; margin:12px 0; }
+.btn-spotify { flex:1; background:#1DB954; color:white; border:none; padding:13px; border-radius:var(--r); font-size:13px; font-weight:700; display:flex; align-items:center; justify-content:center; gap:6px; transition:transform .15s; }
+.btn-spotify:active { transform:scale(.96); }
+.btn-apple   { flex:1; background:linear-gradient(135deg,#fc3c44,#e91e63); color:white; border:none; padding:13px; border-radius:var(--r); font-size:13px; font-weight:700; display:flex; align-items:center; justify-content:center; gap:6px; transition:transform .15s; }
+.btn-apple:active { transform:scale(.96); }
+
+/* Controls */
+.play-ctrl { display:flex; gap:9px; margin-top:4px; }
+.btn-next  { flex:2; background:linear-gradient(135deg,var(--fire),var(--amber)); color:white; border:none; padding:15px; border-radius:50px; font-size:15px; font-weight:800; box-shadow:0 0 24px var(--glow-fire); transition:transform .15s; }
+.btn-next:active { transform:scale(.95); }
+.btn-fav   { flex:0 0 auto; background:var(--surface); border:1px solid var(--border); color:var(--muted); padding:15px 17px; border-radius:50px; font-size:20px; transition:all .2s; }
+.btn-fav.saved { color:var(--rose); border-color:var(--rose); background:rgba(255,64,129,.1); }
+.btn-fav:active { transform:scale(.9); }
+.btn-shuf  { flex:0 0 auto; background:var(--surface); border:1px solid var(--border); color:var(--muted); padding:15px 17px; border-radius:50px; font-size:17px; transition:all .2s; }
+.btn-shuf:active { transform:scale(.9); color:var(--amber); }
+
+/* Session log */
+.session-log { background:var(--surface); border:1px solid var(--border); border-radius:var(--r-lg); padding:14px; margin-top:12px; }
+.sl-header   { font-size:10px; letter-spacing:3px; text-transform:uppercase; color:var(--gold); font-weight:700; margin-bottom:10px; display:flex; justify-content:space-between; }
+.sl-item     { display:flex; gap:9px; padding:8px 0; border-bottom:1px solid var(--border); align-items:flex-start; }
+.sl-item:last-child { border-bottom:none; }
+.sl-emo { font-size:14px; flex-shrink:0; }
+.sl-txt { color:var(--muted); font-size:12px; font-style:italic; line-height:1.4; }
+
+/* =================================================================
+   PLAYLIST SCREEN
+================================================================= */
+#screen-playlist { padding:14px; }
+
+.pl-header h2 { font-family:'Abril Fatface',serif; font-size:26px; }
+.pl-header p  { color:var(--muted); font-size:12px; margin-top:3px; margin-bottom:14px; }
+
+.mood-row { display:flex; gap:7px; overflow-x:auto; scrollbar-width:none; margin-bottom:14px; }
+.mood-row::-webkit-scrollbar { display:none; }
+.mood-pill { flex-shrink:0; background:var(--surface); border:1px solid var(--border); color:var(--muted); padding:8px 14px; border-radius:50px; font-size:12px; font-weight:600; cursor:pointer; transition:all .2s; white-space:nowrap; }
+.mood-pill.active { background:rgba(255,87,34,.12); border-color:rgba(255,87,34,.45); color:var(--fire); }
+.mood-pill:active { transform:scale(.93); }
+
+.sugg-panel { background:rgba(255,87,34,.06); border:1px solid rgba(255,87,34,.18); border-radius:var(--r); padding:12px; margin-bottom:14px; animation:slide-up .3s ease; }
+.sugg-label { font-size:9px; letter-spacing:3px; text-transform:uppercase; color:var(--fire); font-weight:700; margin-bottom:9px; }
+.sugg-song  { display:flex; align-items:center; gap:9px; padding:9px 0; border-bottom:1px solid rgba(255,87,34,.08); cursor:pointer; transition:padding .12s; }
+.sugg-song:last-child { border-bottom:none; }
+.sugg-song:active { padding-left:8px; background:rgba(255,87,34,.06); border-radius:8px; }
+.ss-n { color:var(--fire); font-size:14px; }
+.ss-t { color:var(--text); font-size:13px; font-style:italic; flex:1; }
+.ss-a { color:var(--amber); font-size:14px; }
+
+.pl-add-row { display:flex; gap:8px; margin-bottom:14px; }
+.song-inp   { flex:1; background:var(--surface); border:1.5px solid var(--border); border-radius:var(--r); padding:12px 15px; color:var(--text); font-size:14px; transition:border-color .2s; }
+.song-inp:focus { border-color:var(--amber); }
+.song-inp::placeholder { color:var(--dim); }
+.btn-plus   { background:var(--fire); color:white; border:none; width:46px; height:46px; border-radius:var(--r); font-size:22px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:transform .15s; }
+.btn-plus:active { transform:scale(.9); }
+
+.pl-list  { display:flex; flex-direction:column; gap:7px; margin-bottom:14px; }
+.pl-empty { text-align:center; color:var(--muted); font-size:13px; padding:24px 0; }
+.pl-item  { background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:13px 15px; display:flex; align-items:center; gap:11px; animation:slide-up .25s ease; }
+.pl-num   { color:var(--dim); font-size:12px; font-weight:700; width:16px; text-align:center; }
+.pl-icon  { color:var(--amber); font-size:15px; }
+.pl-name  { flex:1; color:var(--text); font-size:13px; }
+.pl-rm    { background:none; border:none; color:var(--muted); font-size:15px; padding:4px; cursor:pointer; transition:color .15s; }
+.pl-rm:active { color:var(--rose); }
+
+.export-row { display:flex; gap:9px; margin-bottom:18px; }
+
+.sess-title { font-family:'Abril Fatface',serif; font-size:19px; margin-bottom:11px; }
+.sess-card  { background:var(--surface); border:1px solid var(--border); border-radius:var(--r-lg); padding:14px; margin-bottom:9px; cursor:pointer; transition:transform .15s; }
+.sess-card:active { transform:scale(.98); }
+.sc-top  { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:9px; }
+.sc-date { color:var(--muted); font-size:11px; margin-bottom:2px; }
+.sc-name { font-weight:700; font-size:14px; }
+.sc-cnt  { color:var(--fire); font-size:12px; font-weight:700; }
+.sc-tags { display:flex; gap:6px; flex-wrap:wrap; }
+.sc-tag  { background:rgba(255,87,34,.07); border:1px solid rgba(255,87,34,.14); color:var(--muted); padding:4px 10px; border-radius:50px; font-size:10px; }
+
+/* =================================================================
+   BATTLE SCREEN
+================================================================= */
+#screen-battle { padding:14px; }
+
+.battle-hdr   { text-align:center; margin-bottom:16px; }
+.battle-hdr h2{ font-family:'Abril Fatface',serif; font-size:26px; }
+.battle-hdr p { color:var(--muted); font-size:12px; margin-top:3px; }
+
+.scoreboard { display:flex; gap:10px; margin-bottom:16px; align-items:center; }
+.score-p { flex:1; background:var(--surface); border:1px solid var(--border); border-radius:var(--r-lg); padding:14px; text-align:center; transition:all .3s; }
+.score-p.winning { border-color:var(--gold); background:rgba(255,213,79,.07); box-shadow:0 0 20px var(--glow-gold); }
+.sp-lbl  { font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:5px; }
+.sp-name { font-size:14px; font-weight:700; margin-bottom:3px; }
+.sp-pts  { font-family:'Bebas Neue',sans-serif; font-size:40px; line-height:1; color:var(--fire); }
+.score-vs{ color:var(--muted); font-size:16px; font-weight:900; flex-shrink:0; }
+
+.battle-card { background:linear-gradient(135deg,rgba(255,87,34,.1),rgba(255,64,129,.07)); border:1px solid rgba(255,87,34,.4); border-radius:var(--r-xl); padding:20px 18px; text-align:center; margin-bottom:14px; position:relative; overflow:hidden; }
+.bc-lbl  { font-size:10px; letter-spacing:3px; text-transform:uppercase; color:var(--rose); margin-bottom:9px; }
+.bc-title{ font-family:'Abril Fatface',serif; font-size:20px; margin-bottom:6px; }
+.bc-desc { color:var(--muted); font-size:12px; line-height:1.5; }
+
+.battle-inputs { display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-bottom:12px; }
+.bpz { background:var(--surface); border:1px solid var(--border); border-radius:var(--r-lg); padding:13px; }
+.bpz-lbl  { font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); font-weight:700; margin-bottom:9px; }
+.b-inp    { width:100%; background:var(--card); border:1px solid var(--border); border-radius:var(--r-sm,8px); padding:9px 11px; color:var(--text); font-size:13px; margin-bottom:7px; transition:border-color .2s; }
+.b-inp:focus { border-color:var(--amber); }
+.b-inp::placeholder { color:var(--dim); }
+.bpz-song { color:var(--amber); font-size:12px; font-style:italic; min-height:18px; font-weight:600; }
+
+.vote-row { display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-bottom:12px; }
+.btn-vote { background:var(--surface); border:2px solid var(--border); border-radius:var(--r); padding:13px; font-size:13px; font-weight:700; color:var(--muted); transition:all .2s; }
+.btn-vote:active { transform:scale(.95); }
+.btn-vote.v1 { border-color:var(--fire); background:rgba(255,87,34,.12); color:var(--fire); }
+.btn-vote.v2 { border-color:var(--rose); background:rgba(255,64,129,.12); color:var(--rose); }
+
+.bh-title { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin:10px 0 9px; }
+.bh-item  { background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:11px 13px; margin-bottom:7px; display:flex; align-items:center; gap:9px; }
+.bh-rnd   { color:var(--dim); font-size:11px; font-weight:700; flex-shrink:0; }
+.bh-info  { flex:1; }
+.bh-theme { color:var(--muted); font-size:11px; }
+.bh-win   { font-size:12px; font-weight:700; }
+
+/* =================================================================
+   PROFILE SCREEN
+================================================================= */
+#screen-profile { padding:14px; }
+
+.prof-hero { text-align:center; padding:16px 0 20px; }
+.prof-avatar { width:76px; height:76px; border-radius:50%; margin:0 auto 11px; background:linear-gradient(135deg,var(--fire),var(--rose)); display:flex; align-items:center; justify-content:center; font-size:34px; border:3px solid rgba(255,87,34,.4); box-shadow:0 0 28px var(--glow-fire); }
+.prof-name  { font-family:'Abril Fatface',serif; font-size:22px; margin-bottom:3px; }
+.prof-tag   { color:var(--muted); font-size:12px; }
+.prof-partner { display:none; align-items:center; gap:7px; background:rgba(255,87,34,.1); border:1px solid rgba(255,87,34,.25); border-radius:50px; padding:7px 14px; margin-top:10px; font-size:13px; justify-content:center; }
+
+.stats-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:9px; margin:14px 0; }
+.sg-tile    { background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:12px 7px; text-align:center; }
+.sg-val     { font-family:'Bebas Neue',sans-serif; font-size:28px; color:var(--fire); }
+.sg-lbl     { font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-top:2px; }
+
+.ach-title  { font-family:'Abril Fatface',serif; font-size:17px; margin-bottom:10px; }
+.ach-grid   { display:grid; grid-template-columns:repeat(3,1fr); gap:9px; margin-bottom:18px; }
+.ach-item   { background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:12px 7px; text-align:center; transition:all .2s; }
+.ach-item.done { border-color:var(--gold); background:rgba(255,213,79,.07); }
+.ach-ico    { font-size:26px; margin-bottom:5px; filter:grayscale(1) opacity(.35); }
+.ach-item.done .ach-ico { filter:none; }
+.ach-name   { font-size:9px; letter-spacing:1px; text-transform:uppercase; color:var(--muted); }
+.ach-item.done .ach-name { color:var(--gold); }
+
+.set-title  { font-family:'Abril Fatface',serif; font-size:17px; margin-bottom:10px; }
+.set-row    { background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:14px; margin-bottom:7px; display:flex; align-items:center; justify-content:space-between; cursor:pointer; transition:background .15s; }
+.set-row:active { background:var(--card); }
+.sr-l       { display:flex; align-items:center; gap:11px; }
+.sr-ico     { font-size:19px; }
+.sr-lbl     { font-size:14px; font-weight:600; }
+.sr-sub     { font-size:11px; color:var(--muted); }
+.sr-r       { color:var(--muted); font-size:15px; }
+/* Toggle */
+.tog-wrap   { position:relative; }
+.tog-inp    { opacity:0; position:absolute; width:0; height:0; }
+.tog-lbl    { display:block; width:42px; height:23px; background:var(--border); border-radius:11px; cursor:pointer; transition:background .2s; position:relative; }
+.tog-lbl::after { content:''; position:absolute; top:3px; left:3px; width:17px; height:17px; background:white; border-radius:50%; transition:transform .2s; }
+.tog-inp:checked+.tog-lbl { background:var(--fire); }
+.tog-inp:checked+.tog-lbl::after { transform:translateX(19px); }
+</style>
+</head>
+
+<body>
+<div id="app">
+
+  <!-- STATUS BAR -->
+  <div id="status-bar">
+    <span class="sb-time" id="sb-clock">9:41</span>
+    <div class="sb-icons"><span>▲▲▲</span><span>WiFi</span><span>🔋</span></div>
+  </div>
+
+  <!-- SCREENS -->
+  <div id="screens">
+
+    <!-- ─── ONBOARDING ─── -->
+    <div id="onboarding">
+      <div class="ob-logo">Subliminal <span>DJ</span></div>
+      <div class="ob-sub">Where Emotions &amp; Music Collide</div>
+      <div class="ob-vinyl">
+        <svg class="vinyl-glow" width="100" height="100" viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r="48" fill="#1a0800" stroke="#3a1a08" stroke-width="2"/>
+          <circle cx="50" cy="50" r="41" fill="none" stroke="#2a1005" stroke-width="1"/>
+          <circle cx="50" cy="50" r="32" fill="none" stroke="#2a1005" stroke-width="1"/>
+          <circle cx="50" cy="50" r="23" fill="none" stroke="#2a1005" stroke-width="1"/>
+          <circle cx="50" cy="50" r="17" fill="#ff5722"/>
+          <circle cx="50" cy="50" r="11" fill="#e64a19"/>
+          <circle cx="50" cy="50" r="4"  fill="#1a0800"/>
+          <text x="50" y="48" text-anchor="middle" fill="white" font-size="4.5" font-family="sans-serif" font-weight="bold">SDJ</text>
+          <text x="50" y="55" text-anchor="middle" fill="rgba(255,255,255,.5)" font-size="3.5">●●●</text>
+        </svg>
+      </div>
+      <h2 class="ob-title">Your Relationship's<br><em>Soundtrack</em> Starts Here.</h2>
+      <p class="ob-desc">Music-driven prompts that unlock memories, spark intimacy &amp; turn your love story into a playlist you'll never forget.</p>
+      <div class="ob-fields">
+        <input class="ob-inp" id="ob-name"    type="text" placeholder="Your name…"/>
+        <input class="ob-inp" id="ob-partner" type="text" placeholder="Partner's name (optional)…"/>
+      </div>
+      <button class="btn btn-fire btn-full" style="font-size:15px;padding:15px" onclick="finishOnboarding()">▶ Let's Play</button>
+      <span class="ob-skip" onclick="finishOnboarding()">Skip for now</span>
+    </div>
+
+    <!-- ─── HOME ─── -->
+    <div id="screen-home" class="screen">
+      <div class="home-hero">
+        <div class="home-greet" id="h-greet">Good evening 👋</div>
+        <div class="home-logo">Subliminal <span>DJ</span></div>
+        <div class="vinyl-wrap" id="h-vinyl-wrap" onclick="toggleVinyl()">
+          <div class="vinyl-ring"></div><div class="vinyl-ring vinyl-ring-2"></div>
+          <svg class="vinyl-glow" id="h-vinyl" width="108" height="108" viewBox="0 0 108 108">
+            <circle cx="54" cy="54" r="52" fill="#1a0800" stroke="#3a1a08" stroke-width="2"/>
+            <circle cx="54" cy="54" r="45" fill="none" stroke="#2a1005" stroke-width="1"/>
+            <circle cx="54" cy="54" r="36" fill="none" stroke="#2a1005" stroke-width="1"/>
+            <circle cx="54" cy="54" r="27" fill="none" stroke="#2a1005" stroke-width="1"/>
+            <circle cx="54" cy="54" r="19" fill="#ff5722"/>
+            <circle cx="54" cy="54" r="13" fill="#e64a19"/>
+            <circle cx="54" cy="54" r="5"  fill="#1a0800"/>
+            <text x="54" y="52" text-anchor="middle" fill="white" font-size="5" font-family="sans-serif" font-weight="bold">SDJ</text>
+            <text x="54" y="60" text-anchor="middle" fill="rgba(255,255,255,.5)" font-size="3.5">●●●</text>
+          </svg>
+        </div>
+        <div class="home-tagline">Turn your love story into a <b>playlist</b> 🎵</div>
+      </div>
+
+      <div class="qa-row">
+        <div class="qa-pill hot" onclick="goTo('play')">▶ Play Now</div>
+        <div class="qa-pill" onclick="goTo('battle')">⚡ DJ Battle</div>
+        <div class="qa-pill" onclick="goTo('playlist')">♪ Playlist</div>
+        <div class="qa-pill" onclick="goTo('profile')">👤 Profile</div>
+      </div>
+
+      <div class="daily-pick" onclick="goTo('play')">
+        <div class="dp-label"><div class="ld"></div> Today's Pick</div>
+        <div class="dp-title">"Deep Cuts Night"</div>
+        <div class="dp-desc">The songs you've never shared — but that mean everything. A deck for real vulnerability.</div>
+        <div class="dp-foot">
+          <div class="waveform"><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div></div>
+          <button class="btn btn-ghost btn-sm">Play →</button>
+        </div>
+      </div>
+
+      <div class="deck-row-label">Browse Decks</div>
+      <div class="deck-scroll">
+        <div class="deck-thumb" onclick="selectAndPlay('memory')" style="border-color:rgba(156,39,176,.3)">
+          <div class="dt-icon">⏳</div><div class="dt-name" style="color:#ce93d8">Memory Lane</div><div class="dt-count">5 prompts</div>
+        </div>
+        <div class="deck-thumb" onclick="selectAndPlay('fantasy')" style="border-color:rgba(255,64,129,.3)">
+          <div class="dt-icon">✨</div><div class="dt-name" style="color:#f48fb1">Fantasy Freq.</div><div class="dt-count">5 prompts</div>
+        </div>
+        <div class="deck-thumb" onclick="selectAndPlay('vibe')" style="border-color:rgba(0,188,212,.3)">
+          <div class="dt-icon">🎯</div><div class="dt-name" style="color:#80deea">Vibe Check</div><div class="dt-count">5 prompts</div>
+        </div>
+        <div class="deck-thumb" onclick="selectAndPlay('deep')" style="border-color:rgba(255,213,79,.3)">
+          <div class="dt-icon">🖤</div><div class="dt-name" style="color:#fff176">Deep Cuts</div><div class="dt-count">5 prompts</div>
+        </div>
+        <div class="deck-thumb" onclick="goTo('battle')" style="border-color:rgba(255,152,0,.3)">
+          <div class="dt-icon">⚡</div><div class="dt-name" style="color:#ffcc80">DJ Battle</div><div class="dt-count">5 themes</div>
+        </div>
+      </div>
+
+      <div class="home-stats">
+        <div class="hs-box"><div class="hs-val" id="h-sess">0</div><div class="hs-lbl">Sessions</div></div>
+        <div class="hs-box"><div class="hs-val" id="h-cards">0</div><div class="hs-lbl">Cards</div></div>
+        <div class="hs-box"><div class="hs-val" id="h-songs">0</div><div class="hs-lbl">Songs</div></div>
+      </div>
+    </div>
+
+    <!-- ─── PLAY ─── -->
+    <div id="screen-play" class="screen">
+      <div class="play-top">
+        <h2>Game Night</h2>
+        <div class="session-badge"><div class="ld"></div> <span id="badge-count">0</span> played</div>
+      </div>
+      <div class="cat-scroll">
+        <div class="cat-chip active" onclick="selectCat('memory',this)">⏳ Memory</div>
+        <div class="cat-chip" onclick="selectCat('fantasy',this)">✨ Fantasy</div>
+        <div class="cat-chip" onclick="selectCat('vibe',this)">🎯 Vibe</div>
+        <div class="cat-chip" onclick="selectCat('deep',this)">🖤 Deep</div>
+      </div>
+      <div class="game-card" id="game-card" onclick="nextCard()">
+        <div class="gc-bgnote" id="gc-bgnote">♪</div>
+        <div class="gc-cat"><span id="gc-icon">⏳</span><span id="gc-label" style="color:var(--fire)">MEMORY LANE</span></div>
+        <div class="gc-counter" id="gc-counter">Card 1 of 5</div>
+        <p class="gc-prompt" id="gc-prompt">"Play a song that reminds you of when we first met. What memory comes to mind?"</p>
+        <div class="gc-hint">tap card for next →</div>
+      </div>
+      <div class="stream-row">
+        <a href="https://open.spotify.com" target="_blank" class="btn-spotify">🎵 Spotify</a>
+        <a href="https://music.apple.com" target="_blank" class="btn-apple">🎵 Apple Music</a>
+      </div>
+      <div class="play-ctrl">
+        <button class="btn-fav" id="btn-fav" onclick="toggleFav()">♡</button>
+        <button class="btn-next" onclick="nextCard()">Next Card →</button>
+        <button class="btn-shuf" onclick="shuffleDeck()">⇌</button>
+      </div>
+      <div class="session-log" id="session-log" style="display:none">
+        <div class="sl-header"><span>🎵 Session Log</span><span id="sl-count" style="color:var(--muted)">0 cards</span></div>
+        <div id="sl-items"></div>
+      </div>
+    </div>
+
+    <!-- ─── PLAYLIST ─── -->
+    <div id="screen-playlist" class="screen">
+      <div class="pl-header">
+        <div class="sec-eyebrow">Playlist Hub</div>
+        <h2 style="font-family:'Abril Fatface',serif;font-size:26px">Your Soundtrack</h2>
+        <p>Build &amp; revisit your love's greatest hits</p>
+      </div>
+      <div class="mood-row">
+        <div class="mood-pill" onclick="selectMood('romantic',this)">❤️ Romantic</div>
+        <div class="mood-pill" onclick="selectMood('nostalgic',this)">⏳ Nostalgic</div>
+        <div class="mood-pill" onclick="selectMood('playful',this)">😄 Playful</div>
+        <div class="mood-pill" onclick="selectMood('vulnerable',this)">🌙 Vulnerable</div>
+        <div class="mood-pill" onclick="selectMood('fire',this)">🔥 Spicy</div>
+      </div>
+      <div class="sugg-panel" id="sugg-panel" style="display:none">
+        <div class="sugg-label" id="sugg-title">Suggested</div>
+        <div id="sugg-list"></div>
+      </div>
+      <div class="pl-add-row">
+        <input class="song-inp" id="song-inp" type="text" placeholder="Song name + artist…" onkeydown="if(event.key==='Enter')addSong()"/>
+        <button class="btn-plus" onclick="addSong()">+</button>
+      </div>
+      <div class="pl-list" id="pl-list"><div class="pl-empty">No songs yet — start adding! ♪</div></div>
+      <div class="export-row" id="export-row" style="display:none">
+        <a href="https://open.spotify.com" target="_blank" class="btn btn-spotify" style="flex:1;border-radius:50px">🎵 Open Spotify</a>
+        <button class="btn btn-outline btn-sm" onclick="clearPlaylist()">Clear</button>
+      </div>
+      <div class="sess-title">Past Sessions</div>
+      <div id="past-sess">
+        <div class="sess-card">
+          <div class="sc-top"><div><div class="sc-date">Apr 18, 2025</div><div class="sc-name">Fantasy Night 🌟</div></div><span class="sc-cnt">8 cards</span></div>
+          <div class="sc-tags"><span class="sc-tag">♪ Golden Hour</span><span class="sc-tag">♪ Lover</span><span class="sc-tag">♪ Perfect</span></div>
+        </div>
+        <div class="sess-card">
+          <div class="sc-top"><div><div class="sc-date">Apr 12, 2025</div><div class="sc-name">Deep Cuts Night 🖤</div></div><span class="sc-cnt">12 cards</span></div>
+          <div class="sc-tags"><span class="sc-tag">♪ The Night We Met</span><span class="sc-tag">♪ Skinny Love</span><span class="sc-tag">♪ Holocene</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── BATTLE ─── -->
+    <div id="screen-battle" class="screen">
+      <div class="battle-hdr">
+        <div class="sec-eyebrow">⚡ DJ Battle Mode</div>
+        <h2>Head-to-Head</h2>
+        <p>Pick your song. Win the round. Settle it.</p>
+      </div>
+      <div class="scoreboard">
+        <div class="score-p" id="score-p1"><div class="sp-lbl">Player 1</div><div class="sp-name" id="bp1-name">You</div><div class="sp-pts" id="sp1">0</div></div>
+        <div class="score-vs">VS</div>
+        <div class="score-p" id="score-p2"><div class="sp-lbl">Player 2</div><div class="sp-name" id="bp2-name">Partner</div><div class="sp-pts" id="sp2">0</div></div>
+      </div>
+      <div class="battle-card">
+        <div class="bc-lbl">ROUND <span id="rnd-num">1</span> — THEME</div>
+        <div class="bc-title" id="bt-title">"Makeout Mix"</div>
+        <div class="bc-desc" id="bt-desc">Each picks the most fitting song. The other votes for the winner.</div>
+      </div>
+      <div class="battle-inputs">
+        <div class="bpz"><div class="bpz-lbl">Player 1</div><input class="b-inp" id="b-p1" placeholder="Your song…"/><div class="bpz-song" id="b-p1-disp"></div></div>
+        <div class="bpz"><div class="bpz-lbl">Player 2</div><input class="b-inp" id="b-p2" placeholder="Their song…"/><div class="bpz-song" id="b-p2-disp"></div></div>
+      </div>
+      <button class="btn btn-fire btn-full" onclick="lockSongs()" style="margin-bottom:9px">🔒 Lock In Songs</button>
+      <div class="vote-row" id="vote-row" style="display:none">
+        <button class="btn-vote" id="vote-p1" onclick="castVote(1)">👑 P1 Wins</button>
+        <button class="btn-vote" id="vote-p2" onclick="castVote(2)">👑 P2 Wins</button>
+      </div>
+      <button class="btn btn-outline btn-full" onclick="nextTheme()" style="margin-bottom:12px">Next Theme →</button>
+      <div class="bh-title">ROUND HISTORY</div>
+      <div id="bh-list"><div style="color:var(--muted);font-size:12px;text-align:center;padding:14px 0">No rounds yet</div></div>
+    </div>
+
+    <!-- ─── PROFILE ─── -->
+    <div id="screen-profile" class="screen">
+      <div class="prof-hero">
+        <div class="prof-avatar" id="p-avatar">🎵</div>
+        <div class="prof-name" id="p-name">Music Lover</div>
+        <div class="prof-tag">Subliminal DJ Member</div>
+        <div class="prof-partner" id="p-partner"><span>❤️ Playing with</span><strong id="p-pname">Partner</strong></div>
+      </div>
+      <div class="stats-grid">
+        <div class="sg-tile"><div class="sg-val" id="p-sess">0</div><div class="sg-lbl">Sessions</div></div>
+        <div class="sg-tile"><div class="sg-val" id="p-cards">0</div><div class="sg-lbl">Cards</div></div>
+        <div class="sg-tile"><div class="sg-val" id="p-battles">0</div><div class="sg-lbl">Battles</div></div>
+      </div>
+      <div class="ach-title">Achievements</div>
+      <div class="ach-grid">
+        <div class="ach-item done"><div class="ach-ico">🎵</div><div class="ach-name">First Play</div></div>
+        <div class="ach-item" id="ach-10"><div class="ach-ico">🔟</div><div class="ach-name">10 Cards</div></div>
+        <div class="ach-item" id="ach-btl"><div class="ach-ico">⚡</div><div class="ach-name">1st Battle</div></div>
+        <div class="ach-item" id="ach-pl"><div class="ach-ico">🎶</div><div class="ach-name">Playlist DJ</div></div>
+        <div class="ach-item" id="ach-3s"><div class="ach-ico">🏆</div><div class="ach-name">3 Sessions</div></div>
+        <div class="ach-item"><div class="ach-ico">💍</div><div class="ach-name">Soulmates</div></div>
+      </div>
+      <div class="set-title">Settings</div>
+      <div class="set-row" onclick="cycleStream()">
+        <div class="sr-l"><span class="sr-ico">🎵</span><div><div class="sr-lbl">Streaming App</div><div class="sr-sub" id="stream-lbl">Spotify</div></div></div>
+        <span class="sr-r">›</span>
+      </div>
+      <div class="set-row">
+        <div class="sr-l"><span class="sr-ico">🔔</span><div><div class="sr-lbl">Daily Reminders</div><div class="sr-sub">Game night prompts</div></div></div>
+        <div class="tog-wrap"><input type="checkbox" class="tog-inp" id="tog-notif" checked/><label class="tog-lbl" for="tog-notif"></label></div>
+      </div>
+      <div class="set-row">
+        <div class="sr-l"><span class="sr-ico">🌙</span><div><div class="sr-lbl">Dark Mode</div><div class="sr-sub">Always on</div></div></div>
+        <div class="tog-wrap"><input type="checkbox" class="tog-inp" id="tog-dark" checked/><label class="tog-lbl" for="tog-dark"></label></div>
+      </div>
+      <div class="set-row" onclick="showToast('Progress reset! 🔄')">
+        <div class="sr-l"><span class="sr-ico">🔄</span><div><div class="sr-lbl">Reset Progress</div><div class="sr-sub">Clear all data</div></div></div>
+        <span class="sr-r">›</span>
+      </div>
+      <div style="text-align:center;padding:20px 0 6px">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:2px;color:var(--muted)">Subliminal DJ v1.0</div>
+        <div style="color:var(--dim);font-size:11px;margin-top:3px">© 2025 Subliminal DJ</div>
+      </div>
+    </div>
+
+  </div><!-- /screens -->
+
+  <!-- BOTTOM NAV -->
+  <nav id="bottom-nav">
+    <button class="nav-btn active" id="nav-home"     onclick="goTo('home')">    <div class="nav-dot"></div><span class="nav-icon">🏠</span><span class="nav-label">Home</span></button>
+    <button class="nav-btn"        id="nav-play"     onclick="goTo('play')">    <div class="nav-dot"></div><span class="nav-icon">▶</span><span class="nav-label">Play</span></button>
+    <button class="nav-btn"        id="nav-playlist" onclick="goTo('playlist')"><div class="nav-dot"></div><span class="nav-icon">♪</span><span class="nav-label">Playlist</span></button>
+    <button class="nav-btn"        id="nav-battle"   onclick="goTo('battle')">  <div class="nav-dot"></div><span class="nav-icon">⚡</span><span class="nav-label">Battle</span></button>
+    <button class="nav-btn"        id="nav-profile"  onclick="goTo('profile')"> <div class="nav-dot"></div><span class="nav-icon">👤</span><span class="nav-label">Profile</span></button>
+  </nav>
+
+</div><!-- /app -->
+<div id="toast"></div>
+
+<!-- ================================================================
+     JAVASCRIPT — ALL APP LOGIC
+     Edit CARDS_DATA, MOODS, BATTLE_THEMES below to customize content
+================================================================ -->
+<script>
+/* ── A. CONTENT DATA ────────────────────────────────────── */
+
+// Edit prompts freely. Add more objects to add decks.
+const CARDS_DATA = {
+  memory:  { label:'Memory Lane', icon:'⏳', color:'#ce93d8', bg:'⏳',
+    prompts:["Play a song that reminds you of when we first met. What memory comes to mind?","Choose a song that represents a turning point in our relationship.","What song was playing during one of your happiest moments with me?","Pick a track that brings back a memory you've never told me about.","What song would be the anthem of the year we fell in love?"] },
+  fantasy: { label:'Fantasy Frequencies', icon:'✨', color:'#f48fb1', bg:'✨',
+    prompts:["What song would play during our spontaneous road trip?","Pick a song for our ideal lazy Sunday morning.","If we starred in a romantic movie, what's the opening song?","DJ a playlist for the most perfect date night ever.","What song plays when we finally take that dream vacation?"] },
+  vibe:    { label:'Vibe Check', icon:'🎯', color:'#80deea', bg:'🎵',
+    prompts:["Choose a song matching your mood right now — they guess before you explain.","Play a track reflecting how your love feels today.","Pick the song living rent-free in your head this week.","What song would be the soundtrack to your current headspace?","Choose a song that describes how you feel about our future."] },
+  deep:    { label:'Deep Cuts', icon:'🖤', color:'#fff176', bg:'♾',
+    prompts:["What's a song that helped shape who you are? Why?","Pick a song you've never shared with me — but that means something personal.","Choose a track reflecting a part of yourself you wish I understood better.","What song helped you through your hardest moment before we met?","Pick a song that captures your biggest fear. Let's talk about it."] }
+};
+
+// Edit songs under each mood for the Playlist Hub suggestions
+const MOODS = {
+  romantic:   { songs:['Perfect — Ed Sheeran','All of Me — John Legend','Lover — Taylor Swift','Golden Hour — JVKE','Die For You — The Weeknd'] },
+  nostalgic:  { songs:['The Night We Met — Lord Huron','Skinny Love — Bon Iver','Youth — Daughter','Holocene — Bon Iver','Cape Cod Kwassa Kwassa — Vampire Weekend'] },
+  playful:    { songs:["Uptown Funk — Bruno Mars","Happy — Pharrell Williams","Can't Stop the Feeling — JT","Cheap Thrills — Sia","Sugar — Maroon 5"] },
+  vulnerable: { songs:['Poison & Wine — The Civil Wars','Flightless Bird — Fleet Foxes','Heavy — Birdtalker','Saturn — SZA','Liability — Lorde'] },
+  fire:       { songs:['Adorn — Miguel','Body Party — Ciara','Motivation — Normani','Climax — Usher','Best Part — Daniel Caesar'] }
+};
+
+// Add more themes here to expand battle mode
+const BATTLE_THEMES = [
+  { title:'"Makeout Mix"',      desc:'Each picks the most fitting song for setting the mood. The other votes.' },
+  { title:'"Angry Bop"',        desc:'Pick the best song to yell-sing in traffic after a bad day.' },
+  { title:'"Bedroom Energy"',   desc:'60 seconds. Pick your best. No overthinking.' },
+  { title:'"Apology Mix"',      desc:'Who picks the most genuine sorry song? Judge honestly.' },
+  { title:'"Road Trip Opener"', desc:"The song that kicks off every adventure. What's yours?" },
+];
+
+/* ── B. STATE ────────────────────────────────────── */
+const S = {
+  user:'', partner:'', currentCat:'memory', cardIdx:0,
+  favs:new Set(), log:[], totalCards:0, sessions:1,
+  playlist:[], battles:0, scoreP1:0, scoreP2:0,
+  battleIdx:0, round:1, battleHistory:[], locked:false,
+  streamIdx:0,
+};
+const STREAMS = ['Spotify','Apple Music','YouTube Music','Tidal'];
+
+/* ── C. ONBOARDING ─────────────────────────────── */
+function finishOnboarding(){
+  S.user    = document.getElementById('ob-name').value.trim() || 'Music Lover';
+  S.partner = document.getElementById('ob-partner').value.trim();
+  document.getElementById('p-name').textContent    = S.user;
+  document.getElementById('p-avatar').textContent  = S.user[0].toUpperCase();
+  if(S.partner){
+    document.getElementById('p-partner').style.display = 'flex';
+    document.getElementById('p-pname').textContent     = S.partner;
+    document.getElementById('bp1-name').textContent    = S.user;
+    document.getElementById('bp2-name').textContent    = S.partner;
+    document.getElementById('vote-p1').textContent     = `👑 ${S.user} Wins`;
+    document.getElementById('vote-p2').textContent     = `👑 ${S.partner} Wins`;
+  }
+  updateGreeting();
+  const ob = document.getElementById('onboarding');
+  ob.style.opacity = '0'; ob.style.transition = 'opacity .3s';
+  setTimeout(()=>{ ob.style.display='none'; goTo('home'); },300);
+}
+
+/* ── D. NAV ─────────────────────────────────────── */
+function goTo(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('screen-'+id).classList.add('active');
+  document.getElementById('nav-'+id).classList.add('active');
+  syncStats();
+}
+function selectAndPlay(cat){ selectCat(cat,null); goTo('play'); }
+
+/* ── E. CLOCK & GREETING ────────────────────────── */
+function tick(){
+  const now=new Date(), h=now.getHours(), m=now.getMinutes();
+  const hh=h%12||12, mm=m<10?'0'+m:m;
+  document.getElementById('sb-clock').textContent=`${hh}:${mm}`;
+}
+tick(); setInterval(tick,10000);
+
+function updateGreeting(){
+  const h=new Date().getHours(), t=h<12?'Good morning':h<17?'Good afternoon':'Good evening';
+  document.getElementById('h-greet').textContent=`${t}${S.user?', '+S.user:''} 👋`;
+}
+updateGreeting();
+
+/* ── F. VINYL ───────────────────────────────────── */
+let spinning=false;
+function toggleVinyl(){
+  spinning=!spinning;
+  document.getElementById('h-vinyl').style.animation=spinning?'rec-spin 3s linear infinite':'none';
+  spawnNote(document.getElementById('h-vinyl-wrap'));
+}
+
+/* ── G. PLAY ────────────────────────────────────── */
+function selectCat(cat,btn){
+  S.currentCat=cat; S.cardIdx=0;
+  document.querySelectorAll('.cat-chip').forEach(c=>c.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  else document.querySelectorAll('.cat-chip').forEach(c=>{ if(c.textContent.toLowerCase().includes(cat.slice(0,4))) c.classList.add('active'); });
+  renderCard(false);
+}
+
+function renderCard(anim){
+  const cat=CARDS_DATA[S.currentCat];
+  document.getElementById('gc-icon').textContent    = cat.icon;
+  document.getElementById('gc-label').textContent   = cat.label.toUpperCase();
+  document.getElementById('gc-label').style.color   = cat.color;
+  document.getElementById('gc-counter').textContent = `Card ${S.cardIdx+1} of ${cat.prompts.length}`;
+  document.getElementById('gc-prompt').textContent  = `"${cat.prompts[S.cardIdx]}"`;
+  document.getElementById('gc-bgnote').textContent  = cat.bg;
+  const gc=document.getElementById('game-card');
+  gc.style.borderColor = cat.color+'60';
+  gc.style.background  = `linear-gradient(135deg,${cat.color}12,var(--surface))`;
+  gc.style.boxShadow   = `0 0 50px ${cat.color}18`;
+  if(anim){ gc.classList.remove('anim'); void gc.offsetWidth; gc.classList.add('anim'); }
+  const key=S.currentCat+'_'+S.cardIdx, fb=document.getElementById('btn-fav');
+  fb.textContent=S.favs.has(key)?'♥':'♡';
+  fb.classList.toggle('saved',S.favs.has(key));
+}
+
+function nextCard(){
+  const cat=CARDS_DATA[S.currentCat];
+  S.log.unshift({cat:S.currentCat,prompt:cat.prompts[S.cardIdx]});
+  if(S.log.length>8) S.log.pop();
+  S.cardIdx=(S.cardIdx+1)%cat.prompts.length;
+  S.totalCards++;
+  renderCard(true); renderLog(); syncStats(); checkAch();
+  spawnNote(document.getElementById('game-card'));
+}
+
+function toggleFav(){
+  const key=S.currentCat+'_'+S.cardIdx;
+  if(S.favs.has(key)){ S.favs.delete(key); showToast('Removed from favorites'); }
+  else { S.favs.add(key); showToast('♥ Card saved!'); spawnNote(document.getElementById('btn-fav')); }
+  renderCard(false);
+}
+
+function shuffleDeck(){
+  S.cardIdx=Math.floor(Math.random()*CARDS_DATA[S.currentCat].prompts.length);
+  renderCard(true); showToast('🔀 Shuffled!');
+}
+
+function renderLog(){
+  const el=document.getElementById('session-log');
+  if(!S.log.length){ el.style.display='none'; return; }
+  el.style.display='block';
+  document.getElementById('sl-count').textContent=`${S.totalCards} cards`;
+  document.getElementById('sl-items').innerHTML=S.log.slice(0,4).map(l=>{
+    const c=CARDS_DATA[l.cat];
+    return `<div class="sl-item"><span class="sl-emo">${c.icon}</span><span class="sl-txt">"${l.prompt}"</span></div>`;
+  }).join('');
+  document.getElementById('badge-count').textContent=S.totalCards;
+}
+
+/* ── H. PLAYLIST ────────────────────────────────── */
+function selectMood(mood,btn){
+  document.querySelectorAll('.mood-pill').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  const d=MOODS[mood], panel=document.getElementById('sugg-panel');
+  panel.style.display='block';
+  document.getElementById('sugg-title').textContent=`Suggested for ${mood.charAt(0).toUpperCase()+mood.slice(1)}`;
+  document.getElementById('sugg-list').innerHTML=d.songs.map(s=>
+    `<div class="sugg-song" onclick="addSongVal('${s.replace(/'/g,"\\'")}')">
+       <span class="ss-n">♪</span><span class="ss-t">${s}</span><span class="ss-a">+</span>
+     </div>`).join('');
+}
+
+function addSong(){ const f=document.getElementById('song-inp'); if(f.value.trim()) addSongVal(f.value.trim()); f.value=''; }
+function addSongVal(s){ S.playlist.push(s); renderPlaylist(); showToast(`♪ Added: ${s.split('—')[0].trim()}`); checkAch(); syncStats(); }
+
+function renderPlaylist(){
+  const list=document.getElementById('pl-list'), ex=document.getElementById('export-row');
+  if(!S.playlist.length){ list.innerHTML='<div class="pl-empty">No songs yet — start adding! ♪</div>'; ex.style.display='none'; return; }
+  ex.style.display='flex';
+  list.innerHTML=S.playlist.map((s,i)=>
+    `<div class="pl-item"><span class="pl-num">${i+1}</span><span class="pl-icon">♪</span><span class="pl-name">${s}</span><button class="pl-rm" onclick="rmSong(${i})">✕</button></div>`
+  ).join('');
+}
+function rmSong(i){ S.playlist.splice(i,1); renderPlaylist(); syncStats(); }
+function clearPlaylist(){ S.playlist=[]; renderPlaylist(); showToast('Playlist cleared'); }
+
+/* ── I. BATTLE ──────────────────────────────────── */
+function lockSongs(){
+  const p1=document.getElementById('b-p1').value.trim(), p2=document.getElementById('b-p2').value.trim();
+  if(!p1||!p2){ showToast('Both players need a song! 🎵'); return; }
+  document.getElementById('b-p1-disp').textContent='♪ '+p1;
+  document.getElementById('b-p2-disp').textContent='♪ '+p2;
+  document.getElementById('vote-row').style.display='grid';
+  S.locked=true; showToast('Locked! Vote now 🎯');
+}
+
+function castVote(w){
+  if(!S.locked){ showToast('Lock in songs first!'); return; }
+  const theme=BATTLE_THEMES[S.battleIdx%BATTLE_THEMES.length];
+  const winName=w===1?(S.user||'Player 1'):(S.partner||'Player 2');
+  if(w===1){ S.scoreP1++; document.getElementById('score-p1').classList.add('winning'); document.getElementById('score-p2').classList.remove('winning'); document.getElementById('vote-p1').classList.add('v1'); document.getElementById('vote-p2').classList.remove('v2'); }
+  else      { S.scoreP2++; document.getElementById('score-p2').classList.add('winning'); document.getElementById('score-p1').classList.remove('winning'); document.getElementById('vote-p2').classList.add('v2'); document.getElementById('vote-p1').classList.remove('v1'); }
+  document.getElementById('sp1').textContent=S.scoreP1;
+  document.getElementById('sp2').textContent=S.scoreP2;
+  S.battles++; S.battleHistory.unshift({round:S.round,theme:theme.title,winner:winName});
+  renderBH(); showToast(`🏆 ${winName} wins!`); checkAch(); syncStats();
+  spawnNote(document.getElementById('screen-battle'));
+}
+
+function nextTheme(){
+  S.battleIdx++; S.round++; S.locked=false;
+  const t=BATTLE_THEMES[S.battleIdx%BATTLE_THEMES.length];
+  document.getElementById('rnd-num').textContent=S.round;
+  document.getElementById('bt-title').textContent=t.title;
+  document.getElementById('bt-desc').textContent=t.desc;
+  ['b-p1','b-p2'].forEach(id=>document.getElementById(id).value='');
+  ['b-p1-disp','b-p2-disp'].forEach(id=>document.getElementById(id).textContent='');
+  document.getElementById('vote-row').style.display='none';
+  ['vote-p1','vote-p2'].forEach(id=>{ document.getElementById(id).classList.remove('v1','v2'); });
+  showToast('Next round! 🎵');
+}
+
+function renderBH(){
+  const el=document.getElementById('bh-list');
+  if(!S.battleHistory.length){ el.innerHTML='<div style="color:var(--muted);font-size:12px;text-align:center;padding:14px 0">No rounds yet</div>'; return; }
+  el.innerHTML=S.battleHistory.slice(0,5).map(r=>
+    `<div class="bh-item"><span class="bh-rnd">R${r.round}</span><div class="bh-info"><div class="bh-theme">${r.theme}</div><div class="bh-win" style="color:var(--gold)">🏆 ${r.winner}</div></div></div>`
+  ).join('');
+}
+
+/* ── J. SYNC STATS ──────────────────────────────── */
+function syncStats(){
+  document.getElementById('h-sess').textContent   = S.sessions;
+  document.getElementById('h-cards').textContent  = S.totalCards;
+  document.getElementById('h-songs').textContent  = S.playlist.length;
+  document.getElementById('p-sess').textContent   = S.sessions;
+  document.getElementById('p-cards').textContent  = S.totalCards;
+  document.getElementById('p-battles').textContent= S.battles;
+}
+
+/* ── K. ACHIEVEMENTS ────────────────────────────── */
+function checkAch(){
+  if(S.totalCards>=10) unlock('ach-10','10 Cards');
+  if(S.battles>=1)     unlock('ach-btl','1st Battle');
+  if(S.playlist.length>=3) unlock('ach-pl','Playlist DJ');
+  if(S.sessions>=3)    unlock('ach-3s','3 Sessions');
+}
+function unlock(id,name){
+  const el=document.getElementById(id);
+  if(el&&!el.classList.contains('done')){ el.classList.add('done'); showToast(`🏆 Achievement: ${name}!`); }
+}
+
+/* ── L. PROFILE SETTINGS ────────────────────────── */
+function cycleStream(){
+  S.streamIdx=(S.streamIdx+1)%STREAMS.length;
+  document.getElementById('stream-lbl').textContent=STREAMS[S.streamIdx];
+  showToast(`Streaming: ${STREAMS[S.streamIdx]}`);
+}
+
+/* ── M. TOAST ───────────────────────────────────── */
+let toastT;
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.style.display='block';
+  clearTimeout(toastT); toastT=setTimeout(()=>t.style.display='none',2600);
+}
+
+/* ── N. FLOATING NOTES ──────────────────────────── */
+const NOTES=['♪','♫','♩','♬','🎵','🎶'];
+const COLORS=['#ff5722','#ff9800','#ffd54f','#ff4081','#00bcd4'];
+function spawnNote(el){
+  if(!el) return;
+  const r=el.getBoundingClientRect(), n=document.createElement('div');
+  n.className='fnote';
+  n.textContent=NOTES[Math.floor(Math.random()*NOTES.length)];
+  n.style.left =`${r.left+Math.random()*r.width}px`;
+  n.style.top  =`${r.top+r.height/2}px`;
+  n.style.color=COLORS[Math.floor(Math.random()*COLORS.length)];
+  document.body.appendChild(n); setTimeout(()=>n.remove(),1300);
+}
+
+/* ── O. INIT ────────────────────────────────────── */
+document.getElementById('screen-home').classList.add('active');
+renderCard(false); syncStats();
+</script>
+</body>
+</html>
